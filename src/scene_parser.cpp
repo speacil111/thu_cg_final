@@ -266,7 +266,7 @@ Material *SceneParser::parseMaterial() {
             break;
         }
     }
-    auto *answer = new Material(color, Vector3f::ZERO, shininess, type, emission, color, refractive);
+    auto *answer = new Material(shininess, type, emission, color, refractive);
     return answer;
 }
 

@@ -18,18 +18,20 @@ enum Refl_T {
 class Material {
 public:
 
-    explicit Material(const Vector3f &d_color, const Vector3f &s_color = Vector3f::ZERO, float s = 0,
-                     Refl_T type = DIFF,const Vector3f &em=Vector3f::ZERO,const Vector3f &color=Vector3f::ZERO,
-                     float refra=1.0f) : type(type),  
-            diffuseColor(d_color), specularColor(s_color), shininess(s), emission(em) ,
-            color(color) ,refractive(refra){}
+    explicit Material( float s = 0,Refl_T type = DIFF,const Vector3f &em=Vector3f::ZERO,
+                        const Vector3f &color=Vector3f::ZERO,float refra=1.0f) : 
+        type(type), shininess(s), emission(em),color(color) ,refractive(refra){}
 
     virtual ~Material() = default;
 
-    virtual Vector3f getDiffuseColor() const {
-        return diffuseColor;
-    }
+    // virtual Vector3f getDiffuseColor() const {
+    //     return diffuseColor;
+    // }
 
+    virtual float getShininess() const {
+        return shininess;
+    }
+    
     virtual Refl_T getType() const {
         return type;
     }
@@ -57,12 +59,12 @@ public:
 
         float dif_col=Vector3f::dot(N,L);
         float dif_clamp = std::max(Vector3f::dot(N, L), 0.0f);
+        //传入的color即为diffusecolor
+        shaded+=dif_clamp*lightColor*color;
 
-        shaded+=dif_clamp*lightColor*diffuseColor;
-
-        float spe_col=Vector3f::dot(V,R);
-        float spe_clamp = std::max(Vector3f::dot(V, R), 0.0f);
-        shaded+=lightColor*specularColor*pow(spe_clamp,shininess);
+        // float spe_col=Vector3f::dot(V,R);
+        // float spe_clamp = std::max(Vector3f::dot(V, R), 0.0f);
+        // shaded+=lightColor*color*0.5*pow(spe_clamp,shininess);
         
         return shaded;
     }
@@ -71,8 +73,7 @@ protected:
     Refl_T type;  
     Vector3f emission;
     Vector3f color;
-    Vector3f diffuseColor;
-    Vector3f specularColor;
+
     float shininess;
     float refractive;
 

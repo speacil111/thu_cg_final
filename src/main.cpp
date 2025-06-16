@@ -15,7 +15,6 @@
 #include <string>
 
 //定义避免自相交的常亮0.001f
-#define EPSILON 0.001f
 #define SAMPLES 150
 #define RT 0 // 0 for path tracing, 1 for ray tracing
 
@@ -56,11 +55,6 @@ int main(int argc, char *argv[]) {
                 Ray camRay = sp.getCamera()->generateRay(Vector2f(x, y)) ;
                 Vector3f color = Vector3f::ZERO;
                 color= rt.Raytrace(camRay, sp, 0); // 调用光线追踪函数
-                // color= Vector3f(
-                //     clamp(color.x()),
-                //     clamp(color.y()),
-                //     clamp(color.z())
-                // );
                 I.SetPixel(x,y,color);
             }
         }
