@@ -94,6 +94,7 @@ protected:
     Vector3f color;
     float shininess;
     float refractive; //折射率
+    float Intensity;// 光强度
 
 };
 
