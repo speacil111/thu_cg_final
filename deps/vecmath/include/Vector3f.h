@@ -76,7 +76,7 @@ public:
     // by t \in [0,1].  Guarantees that at t = 0, the result is p0 and
     // at p1, the result is p2.
 	static Vector3f cubicInterpolate( const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, const Vector3f& p3, float t );
-
+	
 private:
 
 	float m_elements[ 3 ];

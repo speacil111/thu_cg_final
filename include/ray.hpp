@@ -33,6 +33,8 @@ public:
         return origin + direction * t;
     }
 
+    
+    
 private:
 
     Vector3f origin;
