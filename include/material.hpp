@@ -75,16 +75,27 @@ public:
         return dir - 2 * Vector3f::dot(dir, normal) * normal;
     }
 
-    Vector3f refract_d(const Vector3f &dir, const Vector3f &normal, float refractive) {
-        float cos=Vector3f::dot(dir,normal);
-        float sin2=1-cos*cos;
-        float sin2_t=sin2/refractive/refractive;
-        if(sin2_t>1){ //退化成全反射
-            return reflect_d(dir,normal);
+    Vector3f refract_d(const Vector3f &dir, const Vector3f &normal, float refractive_index) {
+        Vector3f n = normal;
+        float eta = refractive_index;
+        float cos_i = Vector3f::dot(dir, n);
+
+        // 判断是否从内部射出
+        if (cos_i > 0) {
+            n = -n;              // 翻转法线
+            eta = 1 / eta;       // 折射率取倒数
+            cos_i = Vector3f::dot(dir, n);  // 更新 cos_i
         }
-        float cos_t=sqrt(1-sin2_t);
-        return dir*refractive-normal*(cos-cos_t);
+
+        float sin2_t = eta * eta * (1 - cos_i * cos_i);
+        if (sin2_t > 1) {
+            return reflect_d(dir, n); // 全反射
+        }
+        float cos_t = sqrt(1 - sin2_t);
+        return eta * dir - (eta * cos_i + cos_t) * n;
     }
+    // 折射是否正确存疑
+
 
 protected:
     Refl_T type; //材质类型
@@ -94,7 +105,6 @@ protected:
     Vector3f color;
     float shininess;
     float refractive; //折射率
-    float Intensity;// 光强度
 
 };
 
