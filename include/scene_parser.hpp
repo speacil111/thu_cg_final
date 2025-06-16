@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <vecmath.h>
+#include "material.hpp"
 
 class Camera;
 class Light;
@@ -79,6 +80,7 @@ private:
 
     float readFloat();
     int readInt();
+    Refl_T readRefl_T();
 
     FILE *file;
     Camera *camera;

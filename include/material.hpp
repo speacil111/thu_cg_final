@@ -19,7 +19,7 @@ class Material {
 public:
 
     explicit Material(const Vector3f &d_color, const Vector3f &s_color = Vector3f::ZERO, float s = 0,
-                     Refl_T type = DIFF,const Vector3f &em,const Vector3f &color=Vector3f::ZERO,
+                     Refl_T type = DIFF,const Vector3f &em=Vector3f::ZERO,const Vector3f &color=Vector3f::ZERO,
                      float refra=1.0f) : type(type),  
             diffuseColor(d_color), specularColor(s_color), shininess(s), emission(em) ,
             color(color) ,refractive(refra){}

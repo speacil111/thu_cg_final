@@ -51,13 +51,12 @@ class Tracer{
                 for(int li=0;li<sp.getNumLights();li++){
                     Light* light=sp.getLight(li);
                     Vector3f L,LightColor;
-                    light->getIllumination(hit_p, L, LightColor);
-                    finalcolor += hit.getMaterial()->Shade(ray, hit, L, LightColor); // 累加光照   
-                    Ray shadow_ray(hit_p, L.normalized());
+                    light->getIllumination(hit_p, L, LightColor);  
+                    Ray shadow_ray(hit_p+L*EPISILON, L.normalized());
                     Hit shadow_hit;
                     if(!sp.getGroup()->intersect(shadow_ray, shadow_hit, EPISILON)) {
                         // 如果没有交点，说明光线没有被遮挡
-                        finalcolor += hit.getMaterial()->Shade(shadow_ray, hit, L, LightColor);
+                        finalcolor += hit.getMaterial()->Shade(ray, hit, L, LightColor);
                     }
                 }
                 return finalcolor;

@@ -56,18 +56,17 @@ int main(int argc, char *argv[]) {
                 Ray camRay = sp.getCamera()->generateRay(Vector2f(x, y)) ;
                 Vector3f color = Vector3f::ZERO;
                 color= rt.Raytrace(camRay, sp, 0); // 调用光线追踪函数
-                color= Vector3f(
-                    clamp(color.x()),
-                    clamp(color.y()),
-                    clamp(color.z())
-                );
+                // color= Vector3f(
+                //     clamp(color.x()),
+                //     clamp(color.y()),
+                //     clamp(color.z())
+                // );
                 I.SetPixel(x,y,color);
             }
         }
     }
     //Path trace 版本 参考了small_pt
     else{
-
         for(int x = 0; x < camera->getWidth(); x++) {
             for(int y = 0; y < camera->getHeight(); y++) {
                 Vector3f color = Vector3f::ZERO;
