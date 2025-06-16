@@ -8,26 +8,24 @@
 #include "hit.hpp"
 #include <iostream>
 
+enum Refl_T {
+    DIFF,  
+    SPEC,  
+    RFRE,  
+    GLOS   
+}; 
 // TODO: Implement Shade function that computes Phong introduced in class.
-
-enum Refl_T{ DIFF,SPEC,RFRE };
-
 class Material {
 public:
 
-    explicit Material(const Vector3f &obj_color, Vector3f &d_color, const Vector3f &s_color = Vector3f::ZERO, float s = 0,
-                      const Refl_T & t=DIFF, float r = 1.0f, Vector3f e = Vector3f::ZERO) :
-            color(obj_color),diffuseColor(d_color), specularColor(s_color), shininess(s),
-            type(t), refractive(r),emission(e) {
-
-    }
+    explicit Material(const Vector3f &d_color, const Vector3f &s_color = Vector3f::ZERO, float s = 0,
+                     Refl_T type = DIFF,const Vector3f &em,const Vector3f &color=Vector3f::ZERO,
+                     float refra=1.0f) : type(type),  
+            diffuseColor(d_color), specularColor(s_color), shininess(s), emission(em) ,
+            color(color) ,refractive(refra){}
 
     virtual ~Material() = default;
 
-    virtual Vector3f getcolor() const {
-        return color;
-    }
-    
     virtual Vector3f getDiffuseColor() const {
         return diffuseColor;
     }
@@ -36,15 +34,18 @@ public:
         return type;
     }
 
-    virtual Vector3f getemission()const {
+    virtual Vector3f getemission() const {
         return emission;
     }
+
+    virtual Vector3f getcolor() const {
+        return color;
+    }
+
     virtual float getRefractive() const {
         return refractive;
     }
 
-
-    //PA1 shaded :仅用于漫反射
     Vector3f Shade(const Ray &ray, const Hit &hit,
                    const Vector3f &dirToLight, const Vector3f &lightColor) {
         Vector3f shaded = Vector3f::ZERO;
@@ -66,18 +67,14 @@ public:
         return shaded;
     }
 
-    // 计算反射，折射方向
-
-
-
 protected:
-    Refl_T type; //材质类型
+    Refl_T type;  
+    Vector3f emission;
+    Vector3f color;
     Vector3f diffuseColor;
     Vector3f specularColor;
-    Vector3f emission; //自发光
-    Vector3f color;
     float shininess;
-    float refractive; //折射率
+    float refractive;
 
 };
 

@@ -23,7 +23,7 @@ public:
         return dir - 2 * Vector3f::dot(dir, normal) * normal;
     }
 
-    // 计算反射方向
+    // 计算反射方向 没问题
     Vector3f reflect_d(const Vector3f &dir, const Vector3f &normal) {
         return dir - 2 * Vector3f::dot(dir, normal) * normal;
     }
