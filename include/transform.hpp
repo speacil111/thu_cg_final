@@ -35,6 +35,9 @@ public:
         }
         return inter;
     }
+    virtual ObjectType getType() const {
+        return TRANSFORM;
+    }
 
 protected:
     Object3D *o; //un-transformed object

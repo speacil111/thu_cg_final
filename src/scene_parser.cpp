@@ -166,6 +166,8 @@ void SceneParser::parseLights() {
             lights[count] = parseDirectionalLight();
         } else if (strcmp(token, "PointLight") == 0) {
             lights[count] = parsePointLight();
+        } else if (strcmp(token, "AreaLight") == 0) {
+            lights[count] = parseAreaLight();
         } else {
             printf("Unknown token in parseLight: '%s'\n", token);
             exit(0);
@@ -204,6 +206,30 @@ Light *SceneParser::parsePointLight() {
     getToken(token);
     assert (!strcmp(token, "}"));
     return new PointLight(position, color);
+}
+
+Light *SceneParser::parseAreaLight() {
+    char token[MAX_PARSER_TOKEN_LENGTH];
+    getToken(token);
+    assert (!strcmp(token, "{"));
+    getToken(token);
+    assert (!strcmp(token, "center"));
+    Vector3f center = readVector3f();
+    getToken(token);
+    assert (!strcmp(token, "radius"));
+    float radius = readFloat();
+    getToken(token);
+    assert (!strcmp(token, "color"));
+    Vector3f color = readVector3f();
+    getToken(token);
+    assert (!strcmp(token, "emission"));
+    Vector3f emission = readVector3f();
+    getToken(token);
+    assert (!strcmp(token, "normal"));
+    Vector3f normal = readVector3f();
+    getToken(token);
+    assert (!strcmp(token, "}"));
+    return new AreaLight(center, radius, color, emission, normal);
 }
 // ====================================================================
 // ====================================================================
@@ -354,10 +380,14 @@ Sphere *SceneParser::parseSphere() {
     getToken(token);
     assert (!strcmp(token, "radius"));
     float radius = readFloat();
+    Vector3f velocity(0, 0, 0); // default velocity
+    getToken(token);
+    assert(!strcmp(token, "velo"));
+    Vector3f v = readVector3f();
     getToken(token);
     assert (!strcmp(token, "}"));
     assert (current_material != nullptr);
-    return new Sphere(center, radius, current_material);
+    return new Sphere(center, radius, v,current_material);
 }
 
 

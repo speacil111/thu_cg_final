@@ -27,6 +27,9 @@ public:
     std::vector<Vector3f> n;
     bool intersect(const Ray &r, Hit &h, float tmin) override;
 
+    virtual ObjectType getType() const override {
+        return MESH;
+    }
 private:
 
     // Normal can be used for light estimation

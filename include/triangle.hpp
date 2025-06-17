@@ -6,7 +6,6 @@
 #include <cmath>
 #include <iostream>
 using namespace std;
-//有问题！！！
 // TODO: implement this class and add more fields as necessary,
 class Triangle: public Object3D {
 
@@ -21,6 +20,9 @@ public:
 		normal=Vector3f::cross(b-a,c-a).normalized();
 	}
 
+	virtual ObjectType getType() const override {
+		return TRIANGLE;
+	}
 	bool intersect( const Ray& ray,  Hit& hit , float tmin) override {
 		Vector3f ray_o=ray.getOrigin();
 		Vector3f ray_d=ray.getDirection();

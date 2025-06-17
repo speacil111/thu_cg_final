@@ -14,12 +14,16 @@ public:
         // unit ball at the center
         C=Vector3f(0);
         R=1;
+        velocity = Vector3f(0, 0, 0);
     }
 
-    Sphere(const Vector3f &center, float radius, Material *material) : Object3D(material) {
+
+
+    Sphere(const Vector3f &center, float radius, const Vector3f &v,Material *material) : Object3D(material) {
         // 
         C=center;
         R=radius;
+        velocity=v;
     }
 
     ~Sphere() override = default;
@@ -66,9 +70,19 @@ public:
         return false;
     }
 
+
+    void update_center(float t) {
+        C += velocity * t;
+    }
+
+    ObjectType getType() const override {
+        return SPHERE;
+    }
+
 protected:
     Vector3f C;
     float R;
+    Vector3f velocity;
 };
 
 

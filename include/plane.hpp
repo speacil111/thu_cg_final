@@ -39,6 +39,9 @@ public:
         return false;
     }
 
+    virtual ObjectType getType() const override {
+        return PLANE;
+    }
 protected:
     Vector3f normal;
     float d;

@@ -13,5 +13,5 @@ mkdir -p output
 # build/PA1 testcases/scene05_bunny_200.txt output/scene05.bmp
 # build/PA1 testcases/scene06_bunny_1k.txt output/scene06.bmp
 # build/PA1 testcases/scene07_shine.txt output/scene07.bmp
-# build/PA1 testcases/testcase.txt output/testcase.bmp
-build/PA1 testcases/test6.txt output/test6.bmp
+build/PA1 testcases/testcase.txt output/testcase.bmp
+# build/PA1 testcases/test6.txt output/test6.bmp

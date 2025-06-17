@@ -10,21 +10,22 @@
 #include "camera.hpp"
 #include "group.hpp"
 #include "light.hpp"
-#include "trace.hpp"
+#include "tracer.hpp"
 
 #include <string>
 
-//定义避免自相交的常亮0.001f
 #define SAMPLES 150
+#define M_FRAME 10 //快门持续帧数 运动模糊
 #define RT 0 // 0 for path tracing, 1 for ray tracing
 
-using namespace std;
 
+using namespace std;
+//gamma校正
 inline double clamp(double x) {
     return x < 0 ? 0 : (x > 1 ? 1 : x);
 }
 
-inline int toInt(double x){ return int(pow(clamp(x),1/2.2)*255+.5); }
+inline double Gamma(double x){ return pow(clamp(x),1.0/2.2f); }
 
 
 
@@ -42,7 +43,12 @@ int main(int argc, char *argv[]) {
 
     // TODO: Main RayCasting Logic
     // First, parse the scene using SceneParser
-    Tracer rt,pt;
+    Tracer tr;
+    //景深功能
+    double len_rad=0.8 ; //景深半径
+    double focal_dis=200.0; //焦距
+
+
 
     SceneParser sp(inputFile.c_str());
     Camera *camera = sp.getCamera();
@@ -54,12 +60,17 @@ int main(int argc, char *argv[]) {
             for(int y=0;y<camera->getHeight();y++){
                 Ray camRay = sp.getCamera()->generateRay(Vector2f(x, y)) ;
                 Vector3f color = Vector3f::ZERO;
-                color= rt.Raytrace(camRay, sp, 0); // 调用光线追踪函数
+                color= tr.Raytrace(camRay, sp, 0); // 调用光线追踪函数
+                color = Vector3f(
+                    Gamma(color.x()),
+                    Gamma(color.y()),
+                    Gamma(color.z())
+                );
                 I.SetPixel(x,y,color);
             }
         }
     }
-    //Path trace 版本 参考了small_pt
+    //Path trace 版本 加分项外的代码部分参考了small_pt
     else{
         for(int x = 0; x < camera->getWidth(); x++) {
             for(int y = 0; y < camera->getHeight(); y++) {
@@ -74,18 +85,29 @@ int main(int argc, char *argv[]) {
                             float dy = r2 < 1 ? sqrt(r2) - 1 : 1 - sqrt(2 - r2);
                             float u = x + (sx + 0.5f + dx) / 2.0f;
                             float v = y + (sy + 0.5f + dy) / 2.0f;
+                            //运动模糊 默认实现了球体的运动轨迹
+                            float time = ((float)rand())/RAND_MAX;
+                            for (auto &sph : group->getSpheres()) {
+                                sph->update_center(time * M_FRAME);
+                            }
+
                             Vector2f pixelPos(u, v);
-                            Ray camRay = camera->generateRay(pixelPos);
-                            subColor += pt.Pathtrace(camRay, sp, 0);
+                            Ray camRay = camera->generateRay_Dof(pixelPos,len_rad,focal_dis);
+                            subColor += tr.Pathtrace(camRay, sp, 0);
+
+                            //还原球体的位置
+                            for (auto &sph : group->getSpheres()) {
+                                sph->update_center(-time * M_FRAME);
+                            }
                         }
                         color += subColor * 0.25f / (SAMPLES / 4); // 0.25 for 2x2 subpixel average
                     }
                 }
 
-                color = Vector3f(
-                    clamp(color.x()),
-                    clamp(color.y()),
-                    clamp(color.z())
+                color=Vector3f(
+                    Gamma(color.x()),
+                    Gamma(color.y()),
+                    Gamma(color.z())
                 );
                 I.SetPixel(x, y, color);
             }

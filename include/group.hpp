@@ -5,6 +5,7 @@
 #include "object3d.hpp"
 #include "ray.hpp"
 #include "hit.hpp"
+#include "sphere.hpp"
 #include <iostream>
 #include <vector>
 using namespace std;
@@ -40,8 +41,33 @@ public:
         objects[index] = obj;
     }
 
+
     int getGroupSize() {
         return objects.size();
+    }
+
+    Object3D * getObject(int index) {
+        if (index < 0 || index >= objects.size()) {
+            cerr << "Index out of bounds in Group::getObject" << endl;
+            return nullptr;
+        }
+        return objects[index];
+    }
+    virtual ObjectType getType() const override {
+        return GROUP;
+    }
+    // 获取所有球体对象
+    vector<Sphere*> getSpheres() {
+        vector<Sphere*> spheres;
+        for (auto obj : objects) {
+            if(obj->getType() == SPHERE) {
+                Sphere* sphere = dynamic_cast<Sphere*>(obj);
+                if (sphere) {
+                    spheres.push_back(sphere);
+                }
+            }
+        }
+        return spheres;
     }
 
 private:
