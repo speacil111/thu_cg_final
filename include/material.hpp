@@ -6,6 +6,7 @@
 
 #include "ray.hpp"
 #include "hit.hpp"
+
 #include <iostream>
 
 enum Refl_T {
@@ -18,7 +19,7 @@ enum Refl_T {
 class Material {
 public:
 
-    explicit Material( float s = 0,Refl_T type = DIFF,const Vector3f &em=Vector3f::ZERO,
+    explicit Material( float s = 10,Refl_T type = DIFF,const Vector3f &em=Vector3f::ZERO,
                         const Vector3f &color=Vector3f::ZERO,float refra=1.0f) : 
         type(type), shininess(s), emission(em),color(color) ,refractive(refra){}
 
@@ -37,6 +38,9 @@ public:
     }
 
     virtual Vector3f getemission() const {
+        // if(emission !=Vector3f::ZERO){
+        //     printf("emission color: %f %f %f\n", emission.x(), emission.y(), emission.z());
+        // } 会打中！
         return emission;
     }
 
@@ -56,16 +60,19 @@ public:
         Vector3f V=-ray.getDirection().normalized();
         Vector3f L=dirToLight.normalized(); 
         Vector3f R=2*Vector3f::dot(N,L)*N-L;
+        diffuseColor = color;
+        specularColor = Vector3f::ZERO;
 
-        float dif_col=Vector3f::dot(N,L);
-        float dif_clamp = std::max(Vector3f::dot(N, L), 0.0f);
-        //传入的color即为diffusecolor
-        shaded+=dif_clamp*lightColor*color;
-
-        // float spe_col=Vector3f::dot(V,R);
-        // float spe_clamp = std::max(Vector3f::dot(V, R), 0.0f);
-        // shaded+=lightColor*color*0.5*pow(spe_clamp,shininess);
         
+        float dif_col=Vector3f::dot(N,L);
+        float dif_clamp = fabs(Vector3f::dot(N, L));
+
+        shaded+=dif_clamp*lightColor*diffuseColor;
+
+        float spe_col=Vector3f::dot(V,R);
+        float spe_clamp = fabs(Vector3f::dot(V, R));
+        shaded+=lightColor*specularColor*pow(spe_clamp,shininess);
+
         return shaded;
     }
 
@@ -73,7 +80,8 @@ protected:
     Refl_T type;  
     Vector3f emission;
     Vector3f color;
-
+    Vector3f diffuseColor; // Diffuse color, not used in this implementation
+    Vector3f specularColor; // Specular color, not used in this implementation
     float shininess;
     float refractive;
 

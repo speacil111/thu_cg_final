@@ -8,7 +8,7 @@ enum L_T{DIR,POINT,AREA};
 class Light {
 public:
     Light() = default;
-
+    virtual Vector3f getPosition() const { return Vector3f::ZERO; }
     virtual ~Light() = default;
     virtual L_T getType() const = 0; 
     virtual void getIllumination(const Vector3f &p, Vector3f &dir, Vector3f &col) const = 0;
@@ -68,12 +68,20 @@ public:
         return POINT;
     }
 
+    Vector3f getPosition() const override {
+        return position;
+    }
+
+    Vector3f getColor() const {
+        return color;
+    }
 private:
 
     Vector3f position;
     Vector3f color;
 
 };
+
 
 
 // 面光源类
@@ -119,7 +127,7 @@ public:
         return 3.14159*radius * radius;
     }
 
-    Vector3f getPosition() const {
+    Vector3f getPosition() const override{
         return center;
     }
 

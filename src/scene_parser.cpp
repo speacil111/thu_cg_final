@@ -14,6 +14,7 @@
 #include "plane.hpp"
 #include "triangle.hpp"
 #include "transform.hpp"
+#include "square.hpp"
 
 #define DegreesToRadians(x) ((M_PI * x) / 180.0f)
 
@@ -313,7 +314,9 @@ Object3D *SceneParser::parseObject(char token[MAX_PARSER_TOKEN_LENGTH]) {
         answer = (Object3D *) parseTriangleMesh();
     } else if (!strcmp(token, "Transform")) {
         answer = (Object3D *) parseTransform();
-    } else {
+    } else if(!strcmp(token, "Square")) {
+        answer = (Object3D *) parseSquare();
+    }else {
         printf("Unknown token in parseObject: '%s'\n", token);
         exit(0);
     }
@@ -427,6 +430,25 @@ Triangle *SceneParser::parseTriangle() {
     return new Triangle(v0, v1, v2, current_material);
 }
 
+Square *SceneParser::parseSquare() {
+    char token[MAX_PARSER_TOKEN_LENGTH];
+    getToken(token);
+    assert (!strcmp(token, "{"));
+    getToken(token);
+    assert (!strcmp(token, "center"));
+    Vector3f center = readVector3f();
+    getToken(token);
+    assert (!strcmp(token, "edge_length"));
+    float edge_length = readFloat();
+    getToken(token);
+    assert (!strcmp(token, "normal"));
+    Vector3f normal = readVector3f();
+    getToken(token);
+    assert (!strcmp(token, "}"));
+    assert (current_material != nullptr);
+    return new Square(center, edge_length, normal, current_material);
+}
+
 Mesh *SceneParser::parseTriangleMesh() {
     char token[MAX_PARSER_TOKEN_LENGTH];
     char filename[MAX_PARSER_TOKEN_LENGTH];
@@ -444,6 +466,8 @@ Mesh *SceneParser::parseTriangleMesh() {
 
     return answer;
 }
+
+
 
 
 Transform *SceneParser::parseTransform() {
@@ -508,6 +532,8 @@ Transform *SceneParser::parseTransform() {
     assert (!strcmp(token, "}"));
     return new Transform(matrix, object);
 }
+
+
 
 // ====================================================================
 // ====================================================================

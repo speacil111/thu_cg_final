@@ -11,7 +11,8 @@ enum ObjectType {
     PLANE,
     TRIANGLE,
     MESH,
-    TRANSFORM
+    TRANSFORM,
+    SQUARE
 };
 // Base class for all 3d entities.
 class Object3D {
@@ -22,6 +23,15 @@ public:
 
     explicit Object3D(Material *material) {
         this->material = material;
+    }
+    Material *getMaterial() const {
+        return material;
+    }
+    virtual Vector3f getRandomPoint() const {
+        return Vector3f::ZERO;
+    }
+    virtual float getArea() const {
+        return 0.0;
     }
     virtual ObjectType getType() const = 0; // Return the type of the object (e.g., SPHERE, GROUP, etc.)
     // Intersect Ray with this object. If hit, store information in hit structure.

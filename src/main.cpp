@@ -61,11 +61,6 @@ int main(int argc, char *argv[]) {
                 Ray camRay = sp.getCamera()->generateRay(Vector2f(x, y)) ;
                 Vector3f color = Vector3f::ZERO;
                 color= tr.Raytrace(camRay, sp, 0); // 调用光线追踪函数
-                color = Vector3f(
-                    Gamma(color.x()),
-                    Gamma(color.y()),
-                    Gamma(color.z())
-                );
                 I.SetPixel(x,y,color);
             }
         }
@@ -90,11 +85,9 @@ int main(int argc, char *argv[]) {
                             for (auto &sph : group->getSpheres()) {
                                 sph->update_center(time * M_FRAME);
                             }
-
                             Vector2f pixelPos(u, v);
                             Ray camRay = camera->generateRay_Dof(pixelPos,len_rad,focal_dis);
                             subColor += tr.Pathtrace(camRay, sp, 0);
-
                             //还原球体的位置
                             for (auto &sph : group->getSpheres()) {
                                 sph->update_center(-time * M_FRAME);

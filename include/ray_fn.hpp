@@ -18,34 +18,34 @@
 
 class RayFunctions {
 public:
-    // 计算漫反射方向
-    Vector3f r_diffuse(const Vector3f &dir, const Vector3f &normal) {
-        return dir - 2 * Vector3f::dot(dir, normal) * normal;
-    }
 
     // 计算反射方向 没问题
     Vector3f reflect_d(const Vector3f &dir, const Vector3f &normal) {
-        return dir - 2 * Vector3f::dot(dir, normal) * normal;
+        return (dir-2.0f*Vector3f::dot(dir, normal) * normal).normalized();
     }
 
     // 计算折射方向
     Vector3f refract_d(const Vector3f &dir, const Vector3f &normal, float refractive_index) {
         Vector3f n = normal;
-        float eta = refractive_index;
-        float cos_i = Vector3f::dot(dir, n);
+        float cosi = Vector3f::dot(dir, n);  // 入射角的余弦
+        float eta = refractive_index; // η = n1 / n2
 
-        // 判断是否从内部射出
-        if (cos_i > 0) {
-            n = -n;              // 翻转法线
-            eta = 1 / eta;       // 折射率取倒数
-            cos_i = Vector3f::dot(dir, n);  // 更新 cos_i
+        // 如果从内部向外部走，调整法线方向 & η 取倒数
+        if (cosi <0) {
+            cosi = -cosi;
+            eta = 1.0f / eta;
+        }
+        else{
+            n=-n;
         }
 
-        float sin2_t = eta * eta * (1 - cos_i * cos_i);
-        if (sin2_t > 1) {
-            return reflect_d(dir, n); // 全反射
+        float sin2t = pow(eta,2.0f) * (1.0f - pow(cosi,2.0f));
+        if (sin2t > 1.0f) {
+            return reflect_d(dir, n.normalized()); // 全反射
         }
-        float cos_t = sqrt(1 - sin2_t);
-        return eta * dir - (eta * cos_i + cos_t) * n;
+
+        float cost = sqrt(1.0f - sin2t);
+        return (dir * eta + n * (eta * cosi - cost)).normalized();
     }
+
 };

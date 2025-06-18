@@ -9,17 +9,19 @@ PerspectiveCamera {
 
 Lights {
     numLights 1
-    DirectionalLight {
-        direction -0.5 -0.3 -1
+    PointLight {
+        position 50 78 150
         color 0.9 0.9 0.9 
     }
+
 }
 
 Background {
     color 0 0 0 
 }
+
 Materials {
-    numMaterials 12
+    numMaterials 11
     Material { 
         color 0.75 0.25 0.25
         type SPEC
@@ -29,11 +31,11 @@ Materials {
         type DIFF
     }
     Material { 
-        color 0.5 0.75 0.25
+        color 0.75 0.75 0.75 
         type DIFF
     }
     Material { 
-        color 1 1 1
+        color 0.3 0.4 0.5
         type DIFF
     }
     Material {
@@ -41,12 +43,13 @@ Materials {
         type SPEC
     }
     Material {
-        color 0.7 0.8 0.2
-        type GLOS
+        color 1 1 1
+        type RFRE
+        refr 1.5
     }
     Material {
         color 0 0 0
-        emission 0 0 0
+        emission 15 15 15
         type DIFF
     }
     Material {
@@ -56,27 +59,20 @@ Materials {
     Material {
         color 0.69 0.48 0.38
         type DIFF
-
     }
     Material { 
         color 0.75 0.75 0.75 
         type DIFF
-
-    }
-    Material {
-        color 0.3 0.5 0.7
-        type GLOS
     }
     Material {
         color 0 0 0
+        emission 5 5 5
         type DIFF
-        emission 20 20 20
     }
-
 }
 
 Group {
-    numObjects 12
+    numObjects 11
     MaterialIndex 0
     Plane {
         normal 1 0 0
@@ -109,15 +105,14 @@ Group {
     }
     MaterialIndex 4
     Sphere {
-        center 65 43 53
-        radius 16.5 
+        center 70 43 53
+        radius 15
         velo 0 0 0
     }
-    
     MaterialIndex 8
     Sphere {
     center 30 20 110 
-        radius 13
+        radius 12
         velo 0 0 0
     }
 
@@ -127,27 +122,17 @@ Group {
         radius 12
         velo 0 0 0
     }
-
     MaterialIndex 5
     Sphere {
-    center 18 45 40
+    center 18 45 100
         radius 12.5
         velo 0 0 0
     }
-
-    MaterialIndex 10
+    MaterialIndex 0
     Sphere {
-    center  50 60 150
-        radius 5.0
-        velo 0.1 0 0 
+        center 45 55 150
+        radius 7.5
+        velo 0 0 0
     }
-
-    MaterialIndex 11
-    Square {
-    center 50 81 100
-        edge_length 20
-        normal 0 -1 0
-    }
-
 
 }
