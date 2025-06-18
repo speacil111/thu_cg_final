@@ -17,7 +17,7 @@
 #define EPSILON 0.001f
 #define NEE_SP 1
 #define MAX_DEPTH 20
-#define NEE 1 //0 关闭NEE采样，1开启NEE采样
+#define NEE 0 //0 关闭NEE采样，1开启NEE采样
 #define MIS 0 //是否采用MIS混合采样
 inline double max_c(double a,double b,double c){
     return a > b ? (a > c ? a : c) : (b > c ? b : c);
@@ -100,6 +100,7 @@ class Tracer{
             Vector3f hit_e = hit.getMaterial()->getemission();
             Vector3f c = hit.getMaterial()->getcolor();
 
+
             // 俄罗斯轮盘赌策略
             double factor=0.9;
             double p = max_c(c.x(), c.y(), c.z()); 
@@ -115,6 +116,7 @@ class Tracer{
                 }
             }
             Refl_T type = hit.getMaterial()->getType();
+
             if (type == DIFF) {
 
                 Vector3f nl = Vector3f::dot(hit_n, hit_d) < 0 ? hit_n : -hit_n;
@@ -161,7 +163,6 @@ class Tracer{
 
                 Vector3f d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).normalized();
                 Ray new_ray(hit_p, d);
-                //实现MIS加权采样
 
                 return hit_e + c * Pathtrace(new_ray, sp, depth+1) * factor + L_smps; 
             }
@@ -170,10 +171,35 @@ class Tracer{
                 return hit_e + c * Pathtrace(reflect_ray, sp, depth+1)*factor;
             }
             else if(type == RFRE){
+                //实现菲涅尔
                 float refra_ratio = hit.getMaterial()->getRefractive();
                 Vector3f refract_dir = rf.refract_d(hit_d, hit_n, refra_ratio);
-                Ray refract_ray(hit_p, refract_dir);
-                return hit_e + c * Pathtrace(refract_ray, sp, depth+1)*factor;
+                Vector3f reflect_dir = rf.reflect_d(hit_d, hit_n);
+                if((refract_dir-reflect_dir).length()<EPSILON) { //全反射
+                    Ray reflect_ray(hit_p, reflect_dir);
+                    return hit_e + c * Pathtrace(reflect_ray, sp, depth+1)*factor;
+                }
+                else{
+                    float R0,Fr;
+                    float cos_theta=Vector3f::dot(-hit_d, hit_n);
+                    if(cos_theta>0) {//外射入内
+                        R0 = pow((1 - refra_ratio) / (1 + refra_ratio), 2);
+                    } else {
+                        R0 = pow((refra_ratio - 1) / (refra_ratio + 1), 2);
+                    }
+                    Fr=R0+(1-R0)*pow(1-cos_theta, 5); //菲涅尔公式
+                    //先试试随机来减少计算量
+                    // double rn= (double)rand() / RAND_MAX;
+                    // if(rn<Fr) { //反射
+                    //     Ray reflect_ray(hit_p, reflect_dir);
+                    //     return hit_e + c * Pathtrace(reflect_ray, sp, depth+1)*factor;
+                    // }
+                    // else { //折射
+                    //     Ray refract_ray(hit_p, refract_dir);
+                    //     return hit_e + c * Pathtrace(refract_ray, sp, depth+1)*factor;
+                    // }
+                    return hit_e + c * (Fr * Pathtrace(Ray(hit_p, reflect_dir), sp, depth + 1) + (1 - Fr) * Pathtrace(Ray(hit_p, refract_dir), sp, depth + 1)) * factor; //混合采样
+                }
             }
             else if (type == GLOS) {
                 Vector3f nl = Vector3f::dot(hit_n, hit_d) < 0 ? hit_n : -hit_n;

@@ -43,7 +43,7 @@ Materials {
         type DIFF
     }
     Material {
-        color 0.58 0.88 0.82
+        color 0.8 0.88 0.8
         type RFRE
         refr 1.5
     }

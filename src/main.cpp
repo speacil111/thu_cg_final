@@ -11,7 +11,8 @@
 #include "group.hpp"
 #include "light.hpp"
 #include "tracer.hpp"
-#include "tracer_mis.hpp"
+#include <omp.h>
+
 #include <string>
 
 #define SAMPLES 150
@@ -19,7 +20,7 @@
 #define RT 0 // 0 for path tracing, 1 for ray tracing
 #define FXAA 0 //FXAA抗锯齿
 #define DOF 0 //景深
-#define MIS 1 //是否采用MIS混合采样
+#define MIS 0 //是否采用MIS混合采样
 
 using namespace std;
 //gamma校正
@@ -141,7 +142,7 @@ int main(int argc, char *argv[]) {
     // TODO: Main RayCasting Logic
     // First, parse the scene using SceneParser
     Tracer tr;
-    TracerMIS tr_mis;
+
 
     //景深功能
     double len_rad=0.8 ; //景深半径
@@ -153,6 +154,7 @@ int main(int argc, char *argv[]) {
     Image I(camera->getWidth(), camera->getHeight());
     // Then loop over each pixel in the image, shooting a ray
     if(RT){
+        #pragma omp parallel for schedule(dynamic, 1) collapse(2)
         for(int x=0;x<camera->getWidth();x++){
             for(int y=0;y<camera->getHeight();y++){
                 Ray camRay = sp.getCamera()->generateRay(Vector2f(x, y)) ;
@@ -164,6 +166,7 @@ int main(int argc, char *argv[]) {
     }
     //Path trace 版本 加分项外的代码部分参考了small_pt
     else{
+        #pragma omp parallel for schedule(dynamic, 1) collapse(2)
         for(int x = 0; x < camera->getWidth(); x++) {
             for(int y = 0; y < camera->getHeight(); y++) {
                 Vector3f color = Vector3f::ZERO;
@@ -186,21 +189,11 @@ int main(int argc, char *argv[]) {
                             
                             if(DOF){
                                 Ray camRay = camera->generateRay_Dof(pixelPos,len_rad,focal_dis);
-                                if(MIS){
-                                    subColor += tr_mis.Pathtrace(camRay, sp, 0);
-                                }
-                                else{
-                                    subColor += tr.Pathtrace(camRay, sp, 0);
-                                }
+                                subColor += tr.Pathtrace(camRay, sp, 0);
                             }
                             else{
                                 Ray camRay = camera->generateRay(pixelPos);
-                                if(MIS){
-                                    subColor += tr_mis.Pathtrace(camRay, sp, 0);
-                                }
-                                else{
-                                    subColor += tr.Pathtrace(camRay, sp, 0);
-                                }
+                                subColor += tr.Pathtrace(camRay, sp, 0);
                             }
                             //还原球体的位置
                             for (auto &sph : group->getSpheres()) {

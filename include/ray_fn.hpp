@@ -30,13 +30,12 @@ public:
         float cosi = Vector3f::dot(dir, n);  // 入射角的余弦
         float eta = refractive_index; // η = n1 / n2
 
-        // 如果从内部向外部走，调整法线方向 & η 取倒数
-        if (cosi <0) {
-            cosi = -cosi;
-            eta = 1.0f / eta;
+        if (cosi >= 0) {
+            n=-n;
         }
         else{
-            n=-n;
+            cosi = -cosi;
+            eta = 1.0f / eta;
         }
 
         float sin2t = pow(eta,2.0f) * (1.0f - pow(cosi,2.0f));
