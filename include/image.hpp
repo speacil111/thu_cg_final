@@ -57,6 +57,13 @@ public:
 
     void SaveImage(const char *filename);
 
+    int getWidth() const {
+        return width;
+    }
+    int getHeight() const {
+        return height;
+    }
+
 private:
 
     int width;

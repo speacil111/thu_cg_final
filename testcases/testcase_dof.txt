@@ -7,6 +7,13 @@ PerspectiveCamera {
     height 650
 }
 
+Lights {
+    numLights 1
+    DirectionalLight {
+        direction 0.1 -0.5 -1
+        color 0.9 0.9 0.9 
+    }
+}
 
 Background {
     color 0 0 0 
@@ -64,7 +71,7 @@ Materials {
     Material {
         color 0 0 0
         type DIFF
-        emission 15 15 15
+        emission 20 20 20
     }
 
     Material {
@@ -75,7 +82,7 @@ Materials {
 }
 
 Group {
-    numObjects 12
+    numObjects 13
     MaterialIndex 0
     Plane {
         normal 1 0 0
@@ -106,34 +113,6 @@ Group {
         normal 0 -1 0
         offset -81.6
     }
-    MaterialIndex 4
-    Sphere {
-        center 65 43 53
-        radius 16.5 
-        velo 0 0 0
-    }
-    
-    MaterialIndex 8
-    Sphere {
-    center 30 20 110 
-        radius 13
-        velo 0 0 0
-    }
-
-    MaterialIndex 7
-    Sphere {
-    center 70 15 120 
-        radius 12
-        velo 0 0 0
-    }
-
-    MaterialIndex 5
-    Sphere {
-    center 18 45 120
-        radius 10
-        velo 0 0 0
-    }
-
 
     MaterialIndex 11
     Square {
@@ -142,12 +121,45 @@ Group {
         normal 0 -1 0
     }
 
-    MaterialIndex 11
-    Square {
-    center 50 40 290
-        edge_length 20
-        normal 0 0 -1
+
+    MaterialIndex 12
+    Sphere {
+        center 60 40 200
+        radius 5
+        velo 0 0 0
     }
 
+    MaterialIndex 12
+    Sphere {
+        center 50 40 160
+        radius 5
+        velo 0 0 0
+    }
+    MaterialIndex 12
+    Sphere {
+        center 40 40 120
+        radius 5
+        velo 0 0 0 
+    }
 
+    MaterialIndex 12
+    Sphere {
+        center 30 40 80
+        radius 5
+        velo 0 0 0
+    }
+
+    MaterialIndex 12
+    Sphere {
+        center 20 40 80
+        radius 5
+        velo 0 0 0
+    }
+
+    MaterialIndex 11
+    Square {
+        center 50 40 290
+        edge_length 15
+        normal 0 0 1
+    }
 }

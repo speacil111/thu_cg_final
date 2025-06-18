@@ -79,6 +79,10 @@ public:
         return SPHERE;
     }
 
+    Vector3f getV(){
+        return velocity;
+    }
+
 protected:
     Vector3f C;
     float R;
