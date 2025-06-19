@@ -27,15 +27,16 @@ public:
     // 计算折射方向
     Vector3f refract_d(const Vector3f &dir, const Vector3f &normal, float refractive_index) {
         Vector3f n = normal;
-        float cosi = Vector3f::dot(dir, n);  // 入射角的余弦
+        float cosi = -Vector3f::dot(dir, n);  // 入射角的余弦
         float eta = refractive_index; // η = n1 / n2
 
-        if (cosi >= 0) {
-            n=-n;
+        if(cosi>=0.0f){
+            eta= 1.0f / eta; // 如果入射角在法线外侧，交换折射率
+
         }
         else{
-            cosi = -cosi;
-            eta = 1.0f / eta;
+            n = -n; // 如果入射角在法线内侧，法线方向取反
+            cosi = -cosi; // 入射角的余弦取正
         }
 
         float sin2t = pow(eta,2.0f) * (1.0f - pow(cosi,2.0f));

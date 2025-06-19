@@ -19,7 +19,7 @@ public:
 
     // Generate rays for each screen-space coordinate
     virtual Ray generateRay(const Vector2f &point) = 0;
-    virtual Ray generateRay_Dof(const Vector2f &point,double len_rad,double foc_dis) = 0;
+    virtual Ray generateRay_Dof(const Vector2f &point,double len_rad,double foc_dis,unsigned int & seed) = 0;
     virtual ~Camera() = default;
 
     int getWidth() const { return width; }
@@ -59,7 +59,7 @@ public:
     }
 
     //景深效果模拟
-    Ray generateRay_Dof(const Vector2f &point,double len_rad,double foc_dis) override{
+    Ray generateRay_Dof(const Vector2f &point,double len_rad,double foc_dis,unsigned int &seed) override{
         float fx=(width/2.0f)/tan(ang/2.0f);
         float fy = (height / 2.0f) / tan(ang / 2.0f);
         float cx = width / 2.0f;
@@ -70,8 +70,8 @@ public:
 
         Vector3f foc_p=center+dRw *foc_dis;
 
-        double rx= (double)rand() / RAND_MAX;
-        double ry= (double)rand() / RAND_MAX;
+        double rx= (double)rand_r(&seed) / RAND_MAX;
+        double ry= (double)rand_r(&seed) / RAND_MAX;
         double theta= 2* 3.14159 *rx;
         double r=len_rad *sqrt(ry);
 

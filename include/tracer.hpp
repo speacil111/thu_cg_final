@@ -17,8 +17,8 @@
 #define EPSILON 0.001f
 #define NEE_SP 1
 #define MAX_DEPTH 20
-#define NEE 0 //0 关闭NEE采样，1开启NEE采样
-#define MIS 0 //是否采用MIS混合采样
+#define NEE 1 //0 关闭NEE采样，1开启NEE采样
+#define FNIR 0 //0 关闭菲涅尔反射，1开启菲涅尔反射
 inline double max_c(double a,double b,double c){
     return a > b ? (a > c ? a : c) : (b > c ? b : c);
 }
@@ -67,8 +67,8 @@ class Tracer{
                 Ray reflect_ray(hit_p+new_dir*EPSILON, new_dir);
                 return c*Raytrace(reflect_ray, sp, depth+1)*factor;
             }else if(type == RFRE){
-                float refra_ratio = hit.getMaterial()->getRefractive();
-                Vector3f refract_dir = rf.refract_d(hit_d, hit_n, refra_ratio);
+                float eta = hit.getMaterial()->getRefractive();
+                Vector3f refract_dir = rf.refract_d(hit_d, hit_n, eta);
                 Ray refract_ray(hit_p+refract_dir*EPSILON, refract_dir);
                 return c*Raytrace(refract_ray, sp, depth+1)*factor;
             }
@@ -83,7 +83,7 @@ class Tracer{
 
 
         // 路径追踪实现
-        Vector3f Pathtrace(const Ray &ray, SceneParser& sp, int depth) { //路径追踪
+        Vector3f Pathtrace(const Ray &ray, SceneParser& sp, int depth, unsigned int &seed) { //路径追踪
             if (depth >= MAX_DEPTH) { // 限制递归深度
                 return Vector3f::ZERO; // 返回零向量
             }
@@ -107,7 +107,7 @@ class Tracer{
             //printf("p: %f\n", p); // 调试输出
 
             if (depth > 5) {
-                double rn= (double)rand() / RAND_MAX;
+                double rn= (double)rand_r(&seed) / RAND_MAX;
                 //printf("depth: %d, p: %f, rn: %f\n", depth, p, rn);
                 if (rn < p) {
                     factor /=p;
@@ -133,7 +133,7 @@ class Tracer{
                         for(int s=0;s<NEE_SP;s++){
                             double f =0;
                             double Area= obj->getArea(); 
-                            Vector3f rn_p=obj->getRandomPoint(); 
+                            Vector3f rn_p=obj->getRandomPoint(seed); 
                             Vector3f l_dir = rn_p - hit_p; 
                             double light_dist = l_dir.length();
                             Vector3f l_dir_n= l_dir.normalized(); 
@@ -153,8 +153,8 @@ class Tracer{
                     }
                 }
                 //cos-weight
-                double r1 = 2 * PI * ((double)rand() / RAND_MAX);
-                double r2 = (double)rand() / RAND_MAX;
+                double r1 = 2 * PI * ((double)rand_r(&seed) / RAND_MAX);
+                double r2 = (double)rand_r(&seed) / RAND_MAX;
                 double r2s = sqrt(r2);
 
                 Vector3f w = nl;
@@ -162,44 +162,53 @@ class Tracer{
                 Vector3f v = Vector3f::cross(w, u);
 
                 Vector3f d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).normalized();
-                Ray new_ray(hit_p, d);
+                Ray new_ray(hit_p+d*EPSILON, d);
 
-                return hit_e + c * Pathtrace(new_ray, sp, depth+1) * factor + L_smps; 
+                return hit_e + c * Pathtrace(new_ray, sp, depth+1,seed) * factor + L_smps; 
             }
             else if(type == SPEC) {
-                Ray reflect_ray(hit_p, rf.reflect_d(hit_d, hit_n));
-                return hit_e + c * Pathtrace(reflect_ray, sp, depth+1)*factor;
-            }
-            else if(type == RFRE){
-                //实现菲涅尔
-                float refra_ratio = hit.getMaterial()->getRefractive();
-                Vector3f refract_dir = rf.refract_d(hit_d, hit_n, refra_ratio);
                 Vector3f reflect_dir = rf.reflect_d(hit_d, hit_n);
-                if((refract_dir-reflect_dir).length()<EPSILON) { //全反射
-                    Ray reflect_ray(hit_p, reflect_dir);
-                    return hit_e + c * Pathtrace(reflect_ray, sp, depth+1)*factor;
+                Ray reflect_ray(hit_p+reflect_dir*EPSILON, reflect_dir);
+                return hit_e + c * Pathtrace(reflect_ray, sp, depth+1,seed)*factor;
+            }
+            else if (type == RFRE) {
+                float eta = hit.getMaterial()->getRefractive();
+                if(!FNIR){
+                    Vector3f refrac_dir= rf.refract_d(hit_d, hit_n,eta);
+                    Ray refract_ray(hit_p + refrac_dir * EPSILON, refrac_dir);
+                    return hit_e + c * Pathtrace(refract_ray, sp, depth + 1, seed) * factor;
+                }
+                Vector3f n = hit_n;
+                Vector3f reflect_dir = rf.reflect_d(hit_d, hit_n).normalized();
+                float cos_theta = -Vector3f::dot(hit_d, hit_n);
+                if (cos_theta >= 0) {
+                    eta = 1.0f / eta; // 如果入射角在法线内侧，交换折射率
                 }
                 else{
-                    float R0,Fr;
-                    float cos_theta=Vector3f::dot(-hit_d, hit_n);
-                    if(cos_theta>0) {//外射入内
-                        R0 = pow((1 - refra_ratio) / (1 + refra_ratio), 2);
-                    } else {
-                        R0 = pow((refra_ratio - 1) / (refra_ratio + 1), 2);
-                    }
-                    Fr=R0+(1-R0)*pow(1-cos_theta, 5); //菲涅尔公式
-                    //先试试随机来减少计算量
-                    // double rn= (double)rand() / RAND_MAX;
-                    // if(rn<Fr) { //反射
-                    //     Ray reflect_ray(hit_p, reflect_dir);
-                    //     return hit_e + c * Pathtrace(reflect_ray, sp, depth+1)*factor;
-                    // }
-                    // else { //折射
-                    //     Ray refract_ray(hit_p, refract_dir);
-                    //     return hit_e + c * Pathtrace(refract_ray, sp, depth+1)*factor;
-                    // }
-                    return hit_e + c * (Fr * Pathtrace(Ray(hit_p, reflect_dir), sp, depth + 1) + (1 - Fr) * Pathtrace(Ray(hit_p, refract_dir), sp, depth + 1)) * factor; //混合采样
+                    cos_theta = -cos_theta; // 入射角的余弦取正
+                    n = -n; 
                 }
+                float sin2_t = pow(eta,2.0f) * (1.0f - pow(cos_theta,2.0f));
+                if (sin2_t > 1.0f) {
+                    // 全反射
+                    Ray reflect_ray(hit_p+reflect_dir*EPSILON, reflect_dir);
+                    return hit_e + c * Pathtrace(reflect_ray, sp, depth + 1, seed) * factor;
+                }
+
+                float cos_t = sqrt(1.0f - sin2_t);
+                Vector3f refract_dir = (hit_d * eta + n * (eta * cos_theta - cos_t)).normalized();
+
+                float R0 = pow((1.0f - eta) / (1.0f + eta), 2.0f);
+                float Fr = R0 + (1 - R0) * pow(1 - cos_theta, 5.0f);
+                float rn = (float)(rand_r(&seed)) / RAND_MAX;
+                if (rn < Fr) {
+                    Ray reflect_ray(hit_p+reflect_dir*EPSILON, reflect_dir);
+                    return hit_e + c * Pathtrace(reflect_ray, sp, depth + 1, seed) * factor;
+                } else {
+                    Ray refract_ray(hit_p+refract_dir*EPSILON, refract_dir);
+                    return hit_e + c * Pathtrace(refract_ray, sp, depth + 1, seed) * factor;
+                }
+            
             }
             else if (type == GLOS) {
                 Vector3f nl = Vector3f::dot(hit_n, hit_d) < 0 ? hit_n : -hit_n;
@@ -210,15 +219,15 @@ class Tracer{
                 Vector3f v = Vector3f::cross(w, u);
 
                 float radius = 0.6; 
-                double r1 = M_PI * ((double)rand() / RAND_MAX) / 2.0;  // zenith angle in [0, π/2]
-                double r2 = 2.0 * M_PI * ((double)rand() / RAND_MAX);  // azimuth in [0, 2π]
+                double r1 = M_PI * ((double)rand_r(&seed) / RAND_MAX) / 2.0;  // zenith angle in [0, π/2]
+                double r2 = 2.0 * M_PI * ((double)rand_r(&seed) / RAND_MAX);  // azimuth in [0, 2π]
 
                 Vector3f l = (w * cos(r1) + u * sin(r1) * cos(r2) + v * sin(r1) * sin(r2)).normalized() * radius;
                 Vector3f glossy_dir = (reflect_dir + l).normalized();  
                 Ray glossy_ray(hit_p + EPSILON * glossy_dir, glossy_dir);
                 float weight = fabs( Vector3f::dot(nl, glossy_dir)) * 2 * M_PI * radius * radius;
 
-                return hit_e + c * Pathtrace(glossy_ray, sp, depth + 1) * weight;
+                return hit_e + c * Pathtrace(glossy_ray, sp, depth + 1,seed) * weight;
             }
 
             return Vector3f::ZERO; 

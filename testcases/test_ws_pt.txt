@@ -8,7 +8,6 @@ PerspectiveCamera {
 }
 
 
-
 Background {
     color 0 0 0 
 }
@@ -99,13 +98,13 @@ Group {
     }
     MaterialIndex 4
     Sphere {
-        center 70 43 53
+        center 70 43 87
         radius 15
         velo 0 0 0
     }
-    MaterialIndex 8
+    MaterialIndex 5
     Sphere {
-    center 30 20 110 
+    center 25 40 120
         radius 12
         velo 0 0 0
     }
@@ -116,12 +115,7 @@ Group {
         radius 12
         velo 0 0 0
     }
-    MaterialIndex 5
-    Sphere {
-    center 18 45 100
-        radius 12.5
-        velo 0 0 0
-    }
+
     MaterialIndex 0
     Sphere {
         center 45 55 150
@@ -133,5 +127,12 @@ Group {
         center 50 81 150
         edge_length 15
         normal 0 -1 0
+    }
+
+    MaterialIndex 10
+    Square {
+    center 50 40 290
+        edge_length 20
+        normal 0 0 -1
     }
 }

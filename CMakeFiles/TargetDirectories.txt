@@ -1,0 +1,6 @@
+/mnt/c/Users/speacil/Desktop/计图大作业/thu_cg_final/CMakeFiles/PA1.dir
+/mnt/c/Users/speacil/Desktop/计图大作业/thu_cg_final/CMakeFiles/edit_cache.dir
+/mnt/c/Users/speacil/Desktop/计图大作业/thu_cg_final/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/speacil/Desktop/计图大作业/thu_cg_final/deps/vecmath/CMakeFiles/vecmath.dir
+/mnt/c/Users/speacil/Desktop/计图大作业/thu_cg_final/deps/vecmath/CMakeFiles/edit_cache.dir
+/mnt/c/Users/speacil/Desktop/计图大作业/thu_cg_final/deps/vecmath/CMakeFiles/rebuild_cache.dir

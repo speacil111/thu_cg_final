@@ -12,15 +12,15 @@
 #include "light.hpp"
 #include "tracer.hpp"
 #include <omp.h>
-
+#include <ctime>
+#include <chrono>
 #include <string>
 
-#define SAMPLES 150
+#define SAMPLES 150 //采样数
 #define M_FRAME 10 //快门持续帧数 运动模糊
 #define RT 0 // 0 for path tracing, 1 for ray tracing
 #define FXAA 0 //FXAA抗锯齿
 #define DOF 0 //景深
-#define MIS 0 //是否采用MIS混合采样
 
 using namespace std;
 //gamma校正
@@ -173,27 +173,30 @@ int main(int argc, char *argv[]) {
                 for (int sy = 0; sy < 2; sy++) {
                     for (int sx = 0; sx < 2; sx++) {
                         Vector3f subColor = Vector3f::ZERO;
+                        //高精度时钟
+                        unsigned int seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+                        unsigned int each_seed = seed +omp_get_thread_num();
                         for (int s = 0; s < SAMPLES / 4; s++) {
-                            float r1 = 2 * ((float)rand() / RAND_MAX);
+                            float r1 = 2 * ((float) rand_r(&each_seed) / RAND_MAX);
                             float dx = r1 < 1 ? sqrt(r1) - 1 : 1 - sqrt(2 - r1);
-                            float r2 = 2 * ((float)rand() / RAND_MAX);
+                            float r2 = 2 * ((float)rand_r(&each_seed) / RAND_MAX);
                             float dy = r2 < 1 ? sqrt(r2) - 1 : 1 - sqrt(2 - r2);
                             float u = x + (sx + 0.5f + dx) / 2.0f;
                             float v = y + (sy + 0.5f + dy) / 2.0f;
                             //运动模糊 默认实现了球体的运动轨迹
-                            float time = ((float)rand())/RAND_MAX;
+                            float time = ((float)rand_r(&each_seed))/RAND_MAX;
                             for (auto &sph : group->getSpheres()) {
                                 sph->update_center(time * M_FRAME);
                             }
                             Vector2f pixelPos(u, v);
                             
                             if(DOF){
-                                Ray camRay = camera->generateRay_Dof(pixelPos,len_rad,focal_dis);
-                                subColor += tr.Pathtrace(camRay, sp, 0);
+                                Ray camRay = camera->generateRay_Dof(pixelPos,len_rad,focal_dis,each_seed);
+                                subColor += tr.Pathtrace(camRay, sp, 0,each_seed);
                             }
                             else{
                                 Ray camRay = camera->generateRay(pixelPos);
-                                subColor += tr.Pathtrace(camRay, sp, 0);
+                                subColor += tr.Pathtrace(camRay, sp, 0,each_seed);
                             }
                             //还原球体的位置
                             for (auto &sph : group->getSpheres()) {

@@ -7,19 +7,12 @@ PerspectiveCamera {
     height 650
 }
 
-Lights {
-    numLights 1
-    DirectionalLight {
-        direction -0.5 -0.3 -1
-        color 0.9 0.9 0.9 
-    }
-}
 
 Background {
     color 0 0 0 
 }
 Materials {
-    numMaterials 11
+    numMaterials 13
     Material { 
         color 0.75 0.25 0.25
         type SPEC
@@ -29,7 +22,7 @@ Materials {
         type DIFF
     }
     Material { 
-        color 0.75 0.75 0.75
+        color 0.75 0.75 0.75 
         type DIFF
     }
     Material { 
@@ -41,18 +34,18 @@ Materials {
         type SPEC
     }
     Material {
-        color 1 1 1
-        type RFRE
-        refr 1.5
+        color 0.7 0.8 0.2
+        type GLOS
     }
     Material {
         color 0 0 0
-        emission 15 15 15
+        emission 0 0 0
         type DIFF
     }
     Material {
-        color 0.58 0.88 0.82
-        type DIFF
+        color 1 1 1
+        type RFRE
+        refr 1.5
     }
     Material {
         color 0.69 0.48 0.38
@@ -68,12 +61,21 @@ Materials {
         color 0.3 0.5 0.7
         type GLOS
     }
+    Material {
+        color 0 0 0
+        type DIFF
+        emission 20 20 20
+    }
 
+    Material {
+        color 0.78 0.46 0.21
+        type DIFF
+    }
 
 }
 
 Group {
-    numObjects 12
+    numObjects 8
     MaterialIndex 0
     Plane {
         normal 1 0 0
@@ -104,47 +106,23 @@ Group {
         normal 0 -1 0
         offset -81.6
     }
-    MaterialIndex 4
-    Sphere {
-        center 65 43 53
-        radius 16.5 
-        velo 0 0 0
-    }
-    
-
-    MaterialIndex 6
-    Sphere {
-    center 50 681.33 71.6 
-        radius 600
-        velo 0 0 0
-    }
-
-    MaterialIndex 8
-    Sphere {
-    center 30 20 110 
-        radius 13
-        velo 0 0 0
-    }
 
     MaterialIndex 7
     Sphere {
-    center 70 15 120 
-        radius 12
+        center 50 40 100     
+        radius 10
         velo 0 0 0
     }
 
-    MaterialIndex 5
-    Sphere {
-    center 18 45 40
-        radius 12.5
-        velo 0 0 0
+    MaterialIndex 11
+    Square {
+    center 50 40 290
+        edge_length 20
+        normal 0 0 -1
     }
 
-    MaterialIndex 10
-    Sphere {
-    center  50 60 150
-        radius 5.0
-        velo 0.1 0 0 
-    }
+
+
+
 
 }

@@ -81,7 +81,7 @@ public:
     }
 
 
-    Vector3f getRandomPoint() const override {
+    Vector3f getRandomPoint(unsigned int &seed) const override {
         // 构造正方形的局部坐标系
         Vector3f u = Vector3f::cross(normal, Vector3f(1, 0, 0));
         if (u.squaredLength() < 1e-6)
@@ -90,8 +90,8 @@ public:
         Vector3f v = Vector3f::cross(normal, u).normalized();
 
         float half = edge_length / 2.0f;
-        float u_off = ((float)rand() / RAND_MAX) * edge_length - half;
-        float v_off = ((float)rand() / RAND_MAX) * edge_length - half;
+        float u_off = ((float)rand_r(&seed) / RAND_MAX) * edge_length - half;
+        float v_off = ((float)rand_r(&seed) / RAND_MAX) * edge_length - half;
 
         return center + u * u_off + v * v_off;
     }

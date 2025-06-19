@@ -27,7 +27,7 @@ public:
     Material *getMaterial() const {
         return material;
     }
-    virtual Vector3f getRandomPoint() const {
+    virtual Vector3f getRandomPoint(unsigned int &seed) const {
         return Vector3f::ZERO;
     }
     virtual float getArea() const {
