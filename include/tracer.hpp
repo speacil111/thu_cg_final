@@ -17,7 +17,7 @@
 #define EPSILON 0.001f
 #define NEE_SP 1
 #define MAX_DEPTH 20
-#define NEE 1 //0 关闭NEE采样，1开启NEE采样
+#define NEE 0 //0 关闭NEE采样，1开启NEE采样
 #define FNIR 0 //0 关闭菲涅尔反射，1开启菲涅尔反射
 inline double max_c(double a,double b,double c){
     return a > b ? (a > c ? a : c) : (b > c ? b : c);
@@ -43,36 +43,33 @@ class Tracer{
             Vector3f hit_n=hit.getNormal().normalized(); // 碰撞点法线
             Vector3f hit_d=ray.getDirection().normalized();// 射线方向
             Vector3f c = hit.getMaterial()->getcolor();// 碰撞点颜色 color
-
             double factor=0.9;//衰减系数
-
             Vector3f finalcolor=Vector3f::ZERO;
             Refl_T type= hit.getMaterial()->getType(); 
-            if(type==DIFF){
-                for(int li=0;li<sp.getNumLights();li++){
-                    Light* light=sp.getLight(li);
-                    Vector3f L,LightColor;
-                    light->getIllumination(hit_p, L, LightColor);  
-                    //阴影 shadow ray
+            for(int li=0;li<sp.getNumLights();li++){
+                Light* light=sp.getLight(li);
+                Vector3f L,LightColor;
+                light->getIllumination(hit_p, L, LightColor);  
+                if(type==DIFF){
                     Hit shadow_hit;
                     Ray shadow_ray = Ray((hit_p + L * EPSILON), L);
                     bool shadow = sp.getGroup()->intersect(shadow_ray, shadow_hit, EPSILON);
-                    if (!shadow || shadow_hit.getT() >(hit_p-light->getPosition()).length()) {
+                    if (!shadow || shadow_hit.getT() >((hit_p-light->getPosition()).length()-EPSILON)) {
                         finalcolor += hit.getMaterial()->Shade(ray, hit, L, LightColor);
                     }
+                    return finalcolor;
+                }else if (type == SPEC){
+                    Vector3f reflect_dir = rf.reflect_d(hit_d, hit_n); // 计算反射方向
+                    Ray reflect_ray(hit_p+reflect_dir*EPSILON,reflect_dir);
+                    return c*Raytrace(reflect_ray, sp, depth+1)*factor;
+                }else if(type == RFRE){
+                    float eta = hit.getMaterial()->getRefractive();
+                    Vector3f refract_dir = rf.refract_d(hit_d, hit_n, eta);
+                    Ray refract_ray(hit_p+refract_dir*EPSILON, refract_dir);
+                    return c*Raytrace(refract_ray, sp, depth+1)*factor;
                 }
-                return finalcolor;
-            }else if (type == SPEC){
-                Vector3f new_dir = rf.reflect_d(hit_d, hit_n); // 计算反射方向
-                Ray reflect_ray(hit_p+new_dir*EPSILON, new_dir);
-                return c*Raytrace(reflect_ray, sp, depth+1)*factor;
-            }else if(type == RFRE){
-                float eta = hit.getMaterial()->getRefractive();
-                Vector3f refract_dir = rf.refract_d(hit_d, hit_n, eta);
-                Ray refract_ray(hit_p+refract_dir*EPSILON, refract_dir);
-                return c*Raytrace(refract_ray, sp, depth+1)*factor;
             }
-
+            printf("Unknown material type encountered in Raytrace.\n");
             return finalcolor ;
         }
 

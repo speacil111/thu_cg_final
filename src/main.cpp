@@ -16,15 +16,15 @@
 #include <chrono>
 #include <string>
 
-#define SAMPLES 150 //采样数
+#define SAMPLES 250 //采样数
 #define M_FRAME 10 //快门持续帧数 运动模糊
-#define RT 0 // 0 for path tracing, 1 for ray tracing
+#define RT 1 // 0 for path tracing, 1 for ray tracing
 #define FXAA 0 //FXAA抗锯齿
 #define DOF 0 //景深
 
 using namespace std;
 //gamma校正
-inline double clamp(double x) {
+inline double clamp(double x ) {
     return x < 0 ? 0 : (x > 1 ? 1 : x);
 }
 
@@ -51,7 +51,7 @@ float five_min(float a, float b, float c, float d, float e) {
 }
 
 float Pixel2Lum(const Vector3f &pixel) {
-    return 0.213f * pixel.x() + 0.715f * pixel.y() + 0.072f * pixel.z();
+    return 0.299f* pixel.x() + 0.587f* pixel.y() +0.114* pixel.z();
 }
 
 inline float smoothstep(float edge0, float edge1, float x) {
@@ -64,8 +64,8 @@ void apply_fxaa(Image &Img) {
     int h = Img.getHeight();
     Image copy = Image(w, h);
     float contrast = 0.0312f;
-    float minThreshold = 0.2f;
-    float thresholdScale = 0.125f;
+    float minThreshold = 1.0f/12.0f;
+    float maxthreshold= 1.0f/16.0f;
 
     for (int i = 0; i < w; i++) {
         for (int j = 0; j < h; j++) {
@@ -74,8 +74,6 @@ void apply_fxaa(Image &Img) {
     }
     for (int x = 1; x < w - 1; x++) {
         for (int y = 1; y < h - 1; y++) {
-
-            // 将RGB转换成亮度
             float M = Pixel2Lum(copy.GetPixel(x, y));
             float N = Pixel2Lum(copy.GetPixel(x, y - 1));
             float S = Pixel2Lum(copy.GetPixel(x, y + 1));
@@ -88,40 +86,41 @@ void apply_fxaa(Image &Img) {
 
             float Max= five_max(N, S, W, E,M);
             float Min= five_min(N, S, W, E, M);
-            if (Max - Min <= max(minThreshold, Max * thresholdScale)) { 
+            float range= Max - Min;
+            if (range <max(minThreshold, Max * maxthreshold)) { 
                 continue;
             }
 
-            float filter = 2 * (N + E + S + W) + NE + NW + SE + SW;
-            filter /= 12.0f;
-            filter = fabs(filter - M);
+            float filter = fabs((N + E + S + W) * 0.25f - M);
             filter = clamp(filter / contrast);
             float pixelBlend = smoothstep(0.0f, 1.0f, filter);
             pixelBlend *= pixelBlend;
-            //计算方向
-            float vertical = fabs(N + S - 2 * M) * 2 + fabs(NE + SE - 2 * E) + fabs(NW + SW - 2 * W);
-            float horizontal = fabs(E + W - 2 * M) * 2 + fabs(NE + NW - 2 * N) + fabs(SE + SW - 2 * S);
-            bool isHorizontal = vertical > horizontal;
-            int stepX = isHorizontal ? 0 : 1;
-            int stepY = isHorizontal ? 1 : 0;
-            float positive = fabs((isHorizontal ? N : E) - M);
-            float negative = fabs((isHorizontal ? S : W) - M);
 
-            if (positive < negative) {
+            float gx = (E - W + NE - NW + SE - SW) * 0.25f;
+            float gy = (S - N + SE - NE + SW - NW) * 0.25f;
+            bool isHorizontal = fabs(gy) > fabs(gx);
+            int stepX = isHorizontal ? 1 : 0;
+            int stepY = isHorizontal ? 0 : 1;
+            float gPos = isHorizontal ? N : E;
+            float gNeg = isHorizontal ? S : W;
+            if (fabs(gNeg - M) < fabs(gPos - M)) {
                 stepX = -stepX;
                 stepY = -stepY;
             }
-
-            int sampleX = x + stepX;
-            int sampleY = y + stepY;
-            if (sampleX < 0) sampleX = 0;
-            if (sampleY < 0) sampleY = 0;
-            if (sampleX >= w) sampleX = w - 1;
-            if (sampleY >= h) sampleY = h - 1;
-            //截断
-            Vector3f sample = copy.GetPixel(sampleX, sampleY);
-            Vector3f result=sample * pixelBlend + copy.GetPixel(x,y) * (1.0f-pixelBlend);
-            //加权混合
+            int sampleX = x+ stepX;
+            if(sampleX<0) sampleX=0;
+            if(sampleX>=w) sampleX=w-1;
+            int sampleY = y+ stepY;
+            if(sampleY<0) sampleY=0;
+            if(sampleY>=h) sampleY=h-1;
+            Vector3f sampleColor = copy.GetPixel(sampleX, sampleY);
+            Vector3f originalColor = copy.GetPixel(x, y);
+            Vector3f result = sampleColor * pixelBlend + originalColor * (1.0f - pixelBlend);
+            result = Vector3f(
+                clamp(result.x()),
+                clamp(result.y()),
+                clamp(result.z())
+            );
             Img.SetPixel(x,y,result);
         }
     }
@@ -139,11 +138,7 @@ int main(int argc, char *argv[]) {
     string inputFile = argv[1];
     string outputFile = argv[2];  // only bmp is allowed.
 
-    // TODO: Main RayCasting Logic
-    // First, parse the scene using SceneParser
     Tracer tr;
-
-
     //景深功能
     double len_rad=0.8 ; //景深半径
     double focal_dis=80.0; //焦距
@@ -159,7 +154,7 @@ int main(int argc, char *argv[]) {
             for(int y=0;y<camera->getHeight();y++){
                 Ray camRay = sp.getCamera()->generateRay(Vector2f(x, y)) ;
                 Vector3f color = Vector3f::ZERO;
-                color= tr.Raytrace(camRay, sp, 0); // 调用光线追踪函数
+                color = tr.Raytrace(camRay, sp, 0); // 调用光线追踪函数
                 I.SetPixel(x,y,color);
             }
         }
@@ -219,7 +214,6 @@ int main(int argc, char *argv[]) {
 
 
     // 加分项:FXAA implementation
-
     if(FXAA){
         apply_fxaa(I);
     }
