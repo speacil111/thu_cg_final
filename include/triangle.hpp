@@ -23,7 +23,8 @@ public:
 	virtual ObjectType getType() const override {
 		return TRIANGLE;
 	}
-	bool intersect( const Ray& ray,  Hit& hit , float tmin) override {
+	bool intersect( const Ray& ray,  Hit& hit , float tmin,float time) override {
+		
 		Vector3f ray_o=ray.getOrigin();
 		Vector3f ray_d=ray.getDirection();
 		Vector3f edge1=vertices[1]-vertices[0];

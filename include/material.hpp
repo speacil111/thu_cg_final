@@ -63,7 +63,6 @@ public:
         diffuseColor = color;
         specularColor = Vector3f::ZERO;
 
-        
         float dif_col=Vector3f::dot(N,L);
         float dif_clamp = fabs(Vector3f::dot(N, L));
 
@@ -78,10 +77,10 @@ public:
 
 protected:
     Refl_T type;  
-    Vector3f emission;
+    Vector3f emission;//发光系数
     Vector3f color;
-    Vector3f diffuseColor; // Diffuse color, not used in this implementation
-    Vector3f specularColor; // Specular color, not used in this implementation
+    Vector3f diffuseColor; 
+    Vector3f specularColor; 
     float shininess;
     float refractive;
 

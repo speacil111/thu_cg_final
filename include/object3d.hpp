@@ -35,7 +35,7 @@ public:
     }
     virtual ObjectType getType() const = 0; // Return the type of the object (e.g., SPHERE, GROUP, etc.)
     // Intersect Ray with this object. If hit, store information in hit structure.
-    virtual bool intersect(const Ray &r, Hit &h, float tmin) = 0;
+    virtual bool intersect(const Ray &r, Hit &h, float tmin,float time) = 0;
 protected:
     
     Material *material;

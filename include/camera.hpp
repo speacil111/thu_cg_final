@@ -67,19 +67,15 @@ public:
         Vector3f dr((point.x() - cx) / fx, (cy-point.y()) / fy, 1);
         Vector3f dRc=dr.normalized();
         Vector3f dRw=Matrix3f(horizontal,-up,direction)*dRc;
-
+        //上面为正常光线生成逻辑
         Vector3f foc_p=center+dRw *foc_dis;
-
         double rx= (double)rand_r(&seed) / RAND_MAX;
         double ry= (double)rand_r(&seed) / RAND_MAX;
         double theta= 2* 3.14159 *rx;
         double r=len_rad *sqrt(ry);
-
         Vector3f offset = r * cos(theta) * horizontal + r * sin(theta) * up;
         Vector3f new_ori = center + offset;
-        Vector3f new_dir=(foc_p-new_ori).normalized();
-
-        return Ray(new_ori, new_dir);
+        return Ray(new_ori, (foc_p-new_ori).normalized());
     }
 protected:
     float ang;

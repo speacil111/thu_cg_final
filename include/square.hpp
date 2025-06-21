@@ -47,19 +47,15 @@ public:
         return edge_length * edge_length;
     }
 
-    bool intersect(const Ray &ray, Hit &hit, float tmin) override {
+    bool intersect(const Ray &ray, Hit &hit, float tmin,float time) override {
         Vector3f ray_o = ray.getOrigin();
         Vector3f ray_d = ray.getDirection();
-
         float denom = Vector3f::dot(ray_d, normal);
-        if (fabs(denom) < 1e-6) return false; // 平行，不相交
-
+        if (fabs(denom) < 1e-6) return false; 
         float t = Vector3f::dot(center - ray_o, normal) / denom;
         if (t < tmin || t > hit.getT()) return false;
-
-        Vector3f p = ray.pointAtParameter(t); // 交点坐标
-
-        // 构造方形坐标系（两个边方向）
+        Vector3f p = ray.pointAtParameter(t); 
+        // 构造坐标系
         Vector3f u = Vector3f::cross(normal, Vector3f(1, 0, 0));
         if (u.squaredLength() < 1e-6)
             u = Vector3f::cross(normal, Vector3f(0, 1, 0));
@@ -74,7 +70,6 @@ public:
         float half = edge_length / 2.0f;
         if (fabs(u_dist) > half || fabs(v_dist) > half) return false; // 落在正方形之外
 
-        // 命中，更新 hit
         hit.set(t, this->material, normal);
         //printf("hit !!!!"); 可以命中
         return true;

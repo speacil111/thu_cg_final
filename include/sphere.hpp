@@ -28,10 +28,11 @@ public:
 
     ~Sphere() override = default;
 
-    bool intersect(const Ray &r, Hit &h, float tmin) override {
+    bool intersect(const Ray &r, Hit &h, float tmin,float time) override {
+        Vector3f center = get_center(time); //运动模糊实现，更新位置
         Vector3f ray_o = r.getOrigin();
         Vector3f ray_d = r.getDirection().normalized();
-        Vector3f o_c = ray_o - C;
+        Vector3f o_c = ray_o - center;
         float a = 1.0f;
         float b =2.0f*Vector3f::dot(ray_d,o_c);
         float c=o_c.squaredLength()-R*R;
@@ -45,11 +46,11 @@ public:
             if(t>tmin&&t<h.getT()){
                 Vector3f p=ray_o+t*ray_d;
                 if(o_c.squaredLength()>R*R){
-                    Vector3f n=(p-C).normalized();
+                    Vector3f n=(p-center).normalized();
                     h.set(t,material,n);
                     return true;
                 }
-                Vector3f n=(C-p).normalized();
+                Vector3f n=(center-p).normalized();
                 h.set(t,material,n);
                 return true;
             }
@@ -57,22 +58,22 @@ public:
             if(t>tmin&&t<h.getT()){
                 Vector3f p=ray_o+t*ray_d;
                 if(o_c.squaredLength()>R*R){
-                    Vector3f n=(p-C).normalized();
+                    Vector3f n=(p-center).normalized();
                     h.set(t,material,n);
                     return true;
                 }
-                Vector3f n=(p-C).normalized();
+                Vector3f n=(p-center).normalized();
                 h.set(t,material,n);
                 return true;
             }
         }
-        //
+        
         return false;
     }
 
 
-    void update_center(float t) {
-        C += velocity * t;
+    Vector3f get_center(float t) {
+        return  C+ velocity * t;
     }
 
     ObjectType getType() const override {

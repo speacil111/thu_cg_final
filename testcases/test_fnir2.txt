@@ -1,0 +1,133 @@
+PerspectiveCamera {
+    center 50 52 295.6
+    direction 0 0 -1
+    up 0 1 0
+    angle 30
+    width 650
+    height 650
+}
+
+
+
+Background {
+    color 0 0 0 
+}
+Materials {
+    numMaterials 14
+    Material { 
+        color 0.75 0.25 0.25
+        type SPEC
+    }
+    Material { 
+        color 0.25 0.25 0.75 
+        type DIFF
+    }
+    Material { 
+        color 0.75 0.75 0.75 
+        type DIFF
+    }
+    Material { 
+        color 1 1 1
+        type DIFF
+    }
+    Material {
+        color 1 1 1
+        type SPEC
+    }
+    Material {
+        color 0.7 0.8 0.2
+        type GLOS
+    }
+    Material {
+        color 0 0 0
+        emission 0 0 0
+        type DIFF
+    }
+    Material {
+        color 0 0 0
+        type RFRE
+        refr 1.5
+    }
+    Material {
+        color 0.69 0.48 0.38
+        type DIFF
+
+    }
+    Material { 
+        color 0.75 0.75 0.75 
+        type DIFF
+
+    }
+    Material {
+        color 0.3 0.5 0.7
+        type GLOS
+    }
+    Material {
+        color 0 0 0
+        type DIFF
+        emission 15 15 15
+    }
+
+    Material {
+        color 0.78 0.46 0.21
+        type DIFF
+    }
+    Material {
+        color 0.9 0.9 0.9
+        type RFRE
+        refr 1.5
+    }
+
+}
+
+Group {
+    numObjects 8
+    MaterialIndex 0
+    Plane {
+        normal 1 0 0
+        offset 1
+    }
+    MaterialIndex 1
+    Plane {
+        normal -1 0 0
+        offset -99 
+    }
+    MaterialIndex 9
+    Plane {
+        normal 0 0 1
+        offset 0
+    }
+    MaterialIndex 0
+    Plane {
+        normal 0 0 -1
+        offset -300
+    }
+
+    MaterialIndex 2
+    Plane {
+        normal 0 -1 0
+        offset -81.6
+    }
+
+    MaterialIndex 9
+    Plane {
+        normal 0 1 0
+        offset 0
+    }
+
+    MaterialIndex 13
+    Plane {
+        normal 0 0 -1
+        offset -110
+    }
+
+    
+    MaterialIndex 11
+    Square {
+    center 50 81 120
+        edge_length 15
+        normal 0 -1 0
+    }
+
+
+}

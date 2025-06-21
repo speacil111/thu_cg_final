@@ -84,7 +84,7 @@ private:
 
 
 
-// 面光源类
+// 该部分代码无用！！！！！
 class AreaLight : public Light {
 public:
     AreaLight() = delete;

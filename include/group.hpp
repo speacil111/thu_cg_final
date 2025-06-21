@@ -27,10 +27,10 @@ public:
     ~Group() override {
     }
 
-    bool intersect(const Ray &r, Hit &h, float tmin) override {
+    bool intersect(const Ray &r, Hit &h, float tmin,float time) override {
         bool flag = false;
         for (int i=0;i<objects.size();i++) {
-            if (objects[i]->intersect(r, h, tmin)) {
+            if (objects[i]->intersect(r, h, tmin,time)) {
                 flag = true;
             }
         }
@@ -56,7 +56,7 @@ public:
     virtual ObjectType getType() const override {
         return GROUP;
     }
-    // 获取所有球体对象
+    // 获取所有球体对象 无用代码！
     vector<Sphere*> getSpheres() {
         vector<Sphere*> spheres;
         for (auto obj : objects) {
